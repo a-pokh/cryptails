@@ -1,6 +1,7 @@
 {
     "scripts":{
-      "run": "ANCHOR_PROVIDER_URL=http://localhost:8899 node app/index.js"
+      "start": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/index.js",
+      "list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/list.js"
     },
     "dependencies": {
         "@project-serum/anchor": "^0.19.0",

@@ -16,5 +16,5 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.19.0"
-anchor-spl = "0.19.0"
+anchor-lang = {path="../../../anchor/lang"}
+anchor-spl = {path="../../../anchor/spl"}
