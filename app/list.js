@@ -27,5 +27,7 @@ const program = new anchor.Program(idl, programId);
     const cryptailAcc = await program.account.cryptail.fetch(tokenAccountKey);
 
     console.log(cryptailAcc.tokenAccount.toString())
+    console.log(cryptailAcc.name)
+    console.log(cryptailAcc.method)
   }
 })()

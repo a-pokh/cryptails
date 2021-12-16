@@ -13,6 +13,7 @@ const idl = JSON.parse(require('fs').readFileSync('./target/idl/cryptails.json',
 // Address of the deployed program.
 const programId = new PublicKey(data.programId);
 
+//TODO: try move token and mint accounts init to program
 async function createMint(provider, authority) {
   if (authority === undefined) {
     authority = provider.wallet.publicKey;
@@ -36,24 +37,19 @@ const program = new anchor.Program(idl, programId);
 
 (async() => {
     const NAME = 'test_name' + Math.random();
-    const [cryptailsAccount, cryptailsAccountBump] = await PublicKey.findProgramAddress(
-      [Buffer.from(data.mainSeed)],
-      programId
-    )
     const [cryptailAccount, cryptailAccountBump] = await PublicKey.findProgramAddress(
       [Buffer.from(NAME)],
       programId
     )
 
     const provider = anchor.Provider.local();
-    const mint = await createMint(provider, cryptailsAccount);
+    const mint = await createMint(provider, cryptailAccount);
     const tokenAccount = await createTokenAccount(provider, mint.publicKey, provider.wallet.publicKey);
 
     console.log("create " + NAME)
     // Add your test here.
     const tx = await program.rpc.create(Buffer.from(NAME), new anchor.BN(cryptailAccountBump), {
       accounts: {
-        cryptails: cryptailsAccount,
         cryptail: cryptailAccount,
         user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
@@ -64,8 +60,6 @@ const program = new anchor.Program(idl, programId);
       },
       signers: [],
     });
-    const account = await program.account.cryptails.fetch(cryptailsAccount);
     const cryptailAcc = await program.account.cryptail.fetch(cryptailAccount);
     console.log(cryptailAcc)
-    console.log(account);
 })()
