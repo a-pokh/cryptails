@@ -1,6 +1,7 @@
 {
     "scripts":{
-      "start": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/index.js",
+      "init": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/init.js",
+      "create": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/create.js",
       "list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/list.js"
     },
     "dependencies": {

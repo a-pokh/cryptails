@@ -1,9 +1,9 @@
 const anchor = require('@project-serum/anchor');
-const utf8 = anchor.utils.bytes.utf8;
 const spl = require("@solana/spl-token");
 const serumCmn = require("@project-serum/common");
+const data = require('./data');
 
-const { PublicKey, SystemProgram, Keypair, SYSVAR_RENT_PUBKEY } = anchor.web3;
+const { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } = anchor.web3;
 // Configure the client to use the local cluster.
 anchor.setProvider(anchor.Provider.env());
 
@@ -11,11 +11,7 @@ anchor.setProvider(anchor.Provider.env());
 const idl = JSON.parse(require('fs').readFileSync('./target/idl/cryptails.json', 'utf8'));
 
 // Address of the deployed program.
-const programId = new PublicKey('CELEWojrkyqTYFqkevnTQi6rtLwwSMTbRc5vZAy2KwPc');
-
-async function getTokenAccount(provider, addr) {
-  return await serumCmn.getTokenAccount(provider, addr);
-}
+const programId = new PublicKey(data.programId);
 
 async function createMint(provider, authority) {
   if (authority === undefined) {
@@ -38,12 +34,10 @@ async function createTokenAccount(provider, mint, owner) {
 
 const program = new anchor.Program(idl, programId);
 
-
 (async() => {
-  const SHOULD_INIT = false
     const NAME = 'test_name' + Math.random();
     const [cryptailsAccount, cryptailsAccountBump] = await PublicKey.findProgramAddress(
-      [Buffer.from("cryptails_acc")],
+      [Buffer.from(data.mainSeed)],
       programId
     )
     const [cryptailAccount, cryptailAccountBump] = await PublicKey.findProgramAddress(
@@ -51,28 +45,11 @@ const program = new anchor.Program(idl, programId);
       programId
     )
 
-  console.log(cryptailAccount.toString())
-  console.log(cryptailsAccount.toString())
-  console.log(cryptailAccountBump)
-  console.log(cryptailsAccountBump)
-
     const provider = anchor.Provider.local();
     const mint = await createMint(provider, cryptailsAccount);
     const tokenAccount = await createTokenAccount(provider, mint.publicKey, provider.wallet.publicKey);
-  console.log(tokenAccount)
 
-
-  if(SHOULD_INIT) {
-    // as init_if_needed works weird - dispatch init only once and separately for now
-    const txInit = await program.rpc.init({
-      accounts: {
-        cryptails: cryptailsAccount,
-        user: provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [],
-    });
-  }
+    console.log("create " + NAME)
     // Add your test here.
     const tx = await program.rpc.create(Buffer.from(NAME), new anchor.BN(cryptailAccountBump), {
       accounts: {
@@ -87,8 +64,6 @@ const program = new anchor.Program(idl, programId);
       },
       signers: [],
     });
-    console.log("Your transaction signature", tx);
-
     const account = await program.account.cryptails.fetch(cryptailsAccount);
     const cryptailAcc = await program.account.cryptail.fetch(cryptailAccount);
     console.log(cryptailAcc)

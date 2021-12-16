@@ -1,7 +1,8 @@
 const anchor = require('@project-serum/anchor');
+
 const data = require('./data');
 
-const { PublicKey } = anchor.web3;
+const { PublicKey, SystemProgram } = anchor.web3;
 // Configure the client to use the local cluster.
 anchor.setProvider(anchor.Provider.env());
 
@@ -21,11 +22,14 @@ const program = new anchor.Program(idl, programId);
       programId
     )
 
-    const account = await program.account.cryptails.fetch(cryptailsAccount);
-
-  for(let tokenAccountKey of account.tokenAccounts) {
-    const cryptailAcc = await program.account.cryptail.fetch(tokenAccountKey);
-
-    console.log(cryptailAcc.tokenAccount.toString())
-  }
+    console.log("init")
+    // as init_if_needed works weird - dispatch init only once and separately for now
+    const txInit = await program.rpc.init(Buffer.from(data.mainSeed), new anchor.BN(cryptailsAccountBump), {
+      accounts: {
+        cryptails: cryptailsAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [],
+    });
 })()
