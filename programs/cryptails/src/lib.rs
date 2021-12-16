@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, MintTo, TokenAccount};
+use anchor_spl::token::{self, MintTo, SetAuthority, TokenAccount};
+use spl_token::instruction::AuthorityType;
 
 declare_id!("CELEWojrkyqTYFqkevnTQi6rtLwwSMTbRc5vZAy2KwPc");
 
@@ -25,10 +26,16 @@ pub mod cryptails {
             .token_accounts
             .push(*ctx.accounts.cryptail.to_account_info().key);
 
+        // TODO: use cryptails account state data
         let seeds = ["cryptails_acc".as_bytes(), &[254]];
         let signer = &[&seeds[..]];
 
         token::mint_to(ctx.accounts.into_mint_to_context().with_signer(signer), 1)?;
+        token::set_authority(
+            ctx.accounts.into_set_authority_context().with_signer(signer),
+            AuthorityType::MintTokens,
+            None,
+        )?;
 
         let cryptail = &mut ctx.accounts.cryptail;
         cryptail.token_account = *ctx.accounts.token_account.to_account_info().key;
@@ -44,40 +51,40 @@ pub mod cryptails {
 #[derive(Accounts)]
 #[instruction(seed: String, bump: u8)]
 pub struct Init<'info> {
-#[account(
-    init, 
-    seeds = [seed.as_bytes()],
-    bump = bump,
-    payer = user, 
-    space = 2048
-)]
-pub cryptails: Account<'info, Cryptails>,
-pub user: Signer<'info>,
-pub system_program: Program<'info, System>,
+    #[account(
+        init, 
+        seeds = [seed.as_bytes()],
+        bump = bump,
+        payer = user, 
+        space = 2048
+    )]
+    pub cryptails: Account<'info, Cryptails>,
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 #[instruction(name: String, bump: u8)]
 pub struct Create<'info> {
-#[account(mut)]
-pub cryptails: Account<'info, Cryptails>,
-#[account(
-    init, 
-    seeds = [name.as_bytes()],
-    bump = bump,
-    payer = user,
-    space = 2048
-)]
-pub cryptail: Account<'info, Cryptail>,
-#[account(mut)]
-pub token_account: Box<Account<'info, TokenAccount>>,
-#[account(mut)]
-pub mint: AccountInfo<'info>,
-#[account(mut)]
-pub user: Signer<'info>,
-pub system_program: Program<'info, System>,
-pub token_program: AccountInfo<'info>,
-pub rent: Sysvar<'info, Rent>,
+    #[account(mut)]
+    pub cryptails: Account<'info, Cryptails>,
+    #[account(
+        init, 
+        seeds = [name.as_bytes()],
+        bump = bump,
+        payer = user,
+        space = 2048
+    )]
+    pub cryptail: Account<'info, Cryptail>,
+    #[account(mut)]
+    pub token_account: Box<Account<'info, TokenAccount>>,
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    pub token_program: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> Create<'info> {
@@ -86,6 +93,17 @@ impl<'info> Create<'info> {
             mint: self.mint.to_account_info().clone(),
             to: self.token_account.to_account_info().clone(),
             authority: self.cryptails.to_account_info().clone(),
+        };
+        CpiContext::new(
+            self.token_program.clone(), 
+            cpi_accounts, 
+        )
+    }
+
+    fn into_set_authority_context(&self) -> CpiContext<'_, '_, '_, 'info, SetAuthority<'info>> {
+        let cpi_accounts = SetAuthority {
+            account_or_mint: self.mint.to_account_info().clone(),
+            current_authority: self.cryptails.to_account_info().clone(),
         };
         CpiContext::new(
             self.token_program.clone(), 
