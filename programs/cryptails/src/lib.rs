@@ -13,12 +13,8 @@ pub mod cryptails {
         name: String,
         bump: u8,
     ) -> ProgramResult {
-        let nn = name.clone();
-        let bb = bump;
-        // TODO: use cryptails account state data
-        let seeds = [nn.as_bytes(), &[bb]];
+        let seeds = [name.as_bytes(), &[bump]];
         let signer = &[&seeds[..]];
-
         token::mint_to(ctx.accounts.into_mint_to_context().with_signer(signer), 1)?;
         token::set_authority(
             ctx.accounts.into_set_authority_context().with_signer(signer),
