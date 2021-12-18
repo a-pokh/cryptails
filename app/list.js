@@ -30,6 +30,6 @@ const program = new anchor.Program(idl, programId);
   }
 
   for(let tokenAccount of listToShow) {
-    console.log(tokenAccount)
+    console.log(tokenAccount.tokenMintAccount.toString())
   }
 })()

@@ -1,5 +1,7 @@
 [programs.localnet]
 cryptails = "CELEWojrkyqTYFqkevnTQi6rtLwwSMTbRc5vZAy2KwPc"
+marketplace = "Azvt8NqEDCpNTWzwk8nLS8wrJSeq3XLVrFAvDo8eimZw"
+transfer = "9vkSpJ1iaVn7STaGHnx2r4iaYjYqiGH4aYiy5RFPpr4g"
 
 [registry]
 url = "https://anchor.projectserum.com"

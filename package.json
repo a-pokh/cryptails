@@ -2,7 +2,10 @@
     "scripts":{
       "create": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/create.js",
       "list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/list.js",
-      "mp-list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/mp-list.js"
+      "mp-list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/mp-list.js",
+      "mp-sell": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/mp-sell.js",
+      "transfer": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/transfer.js",
+      "mp-sell-list": "ANCHOR_PROVIDER_URL=http://localhost:8899 ANCHOR_WALLET=/home/apokh/.config/solana/id.json node app/mp-sell-list.js"
     },
     "dependencies": {
         "@project-serum/anchor": "^0.19.0",

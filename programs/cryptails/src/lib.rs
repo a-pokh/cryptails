@@ -13,16 +13,21 @@ pub mod cryptails {
         name: String,
         bump: u8,
     ) -> ProgramResult {
+        // create PDA signer
         let seeds = [name.as_bytes(), &[bump]];
         let signer = &[&seeds[..]];
+        // mint to user's token account and sign with cryptail PDA
         token::mint_to(ctx.accounts.into_mint_to_context().with_signer(signer), 1)?;
+        // set authority to None to prevent new mint
         token::set_authority(
             ctx.accounts.into_set_authority_context().with_signer(signer),
             AuthorityType::MintTokens,
             None,
         )?;
 
+        // save token data
         let cryptail = &mut ctx.accounts.cryptail;
+        cryptail.token_mint_account = *ctx.accounts.mint.to_account_info().key;
         cryptail.token_account = *ctx.accounts.token_account.to_account_info().key;
         cryptail.name = name.clone();
         cryptail.ingridients = name.clone();
@@ -82,6 +87,7 @@ impl<'info> Create<'info> {
 
 #[account]
 pub struct Cryptail {
+    pub token_mint_account: Pubkey,
     pub token_account: Pubkey,
     pub name: String,
     pub ingridients: String,
