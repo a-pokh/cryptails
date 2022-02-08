@@ -11,6 +11,8 @@ pub mod cryptails {
     pub fn create(
         ctx: Context<Create>, 
         name: String,
+        ingridients: String,
+        method: String,
         bump: u8,
     ) -> ProgramResult {
         // create PDA signer
@@ -29,9 +31,10 @@ pub mod cryptails {
         let cryptail = &mut ctx.accounts.cryptail;
         cryptail.token_mint_account = *ctx.accounts.mint.to_account_info().key;
         cryptail.token_account = *ctx.accounts.token_account.to_account_info().key;
-        cryptail.name = name.clone();
-        cryptail.ingridients = name.clone();
-        cryptail.method = name;
+        cryptail.owner_account = *ctx.accounts.user.to_account_info().key;
+        cryptail.name = name;
+        cryptail.ingridients = ingridients;
+        cryptail.method = method;
         cryptail.experience = 0;
      
         Ok(())
@@ -39,7 +42,7 @@ pub mod cryptails {
 }
 
 #[derive(Accounts)]
-#[instruction(name: String, bump: u8)]
+#[instruction(name: String, ingridients: String, method: String, bump: u8)]
 pub struct Create<'info> {
     #[account(
         init, 
@@ -87,8 +90,13 @@ impl<'info> Create<'info> {
 
 #[account]
 pub struct Cryptail {
+    // keep token mint account to create new token account on its base
     pub token_mint_account: Pubkey,
+    // current token account where token exists. changes on buy/sell
+    // when sell - it is exists on marketplace side 
     pub token_account: Pubkey,
+    // account of current owner. changes on buy
+    pub owner_account: Pubkey,
     pub name: String,
     pub ingridients: String,
     pub method: String,

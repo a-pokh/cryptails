@@ -15,16 +15,15 @@ pub mod marketplace {
     ) -> ProgramResult {
         token::transfer(ctx.accounts.into_transfer_context(), 1)?;
         
-        let cryptail = &ctx.accounts.cryptail;
         let marketplace_item = &mut ctx.accounts.marketplace_item;
-        marketplace_item.name = cryptail.name.clone();
-        marketplace_item.token_mint_account = cryptail.token_mint_account;
-        marketplace_item.token_account = *ctx.accounts.mp_token_account.to_account_info().key;
-        marketplace_item.seller = *ctx.accounts.user.to_account_info().key;
-        marketplace_item.buyer = None;
+        marketplace_item.cryptail_account = *ctx.accounts.cryptail.to_account_info().key;
+        marketplace_item.seller_account = *ctx.accounts.user.to_account_info().key;
+        marketplace_item.buyer_account = None;
         marketplace_item.start_sell_at = 0;
         marketplace_item.bought_at = 0;
         marketplace_item.price = price;
+
+        // update Cryptail with actual info: current token account
 
         Ok(())
     }
@@ -46,9 +45,12 @@ pub mod marketplace {
             ],
         )?;
         
-        marketplace_item.token_account = *ctx.accounts.buyer_token_account.to_account_info().key;
-        marketplace_item.buyer = None;
+        marketplace_item.buyer_account = None;
         marketplace_item.bought_at = 0;
+
+        // send SOL to seller
+        // send token to buyer
+        // update Cryptail with actual info: current token account and new owner
 
         Ok(())
     }
@@ -57,8 +59,10 @@ pub mod marketplace {
 #[derive(Accounts)]
 #[instruction(price: u64, seed: String, bump: u8)]
 pub struct Sell<'info> {
+    // create new marketplace item on sell
     #[account(
         init, 
+        // TODO: seed should be unique per sell, should contain more than name
         seeds = [seed.as_bytes()],
         bump = bump,
         payer = user,
@@ -67,6 +71,8 @@ pub struct Sell<'info> {
     pub marketplace_item: Account<'info, MarketplaceItem>,
     #[account(mut)]
     pub seller_token_account: Box<Account<'info, TokenAccount>>,
+    // marketplace should have token account for specific account to store it
+    // TODO: init it here
     #[account(mut)]
     pub mp_token_account: Box<Account<'info, TokenAccount>>,
     pub cryptail: Account<'info, Cryptail>,
@@ -111,11 +117,10 @@ pub struct Buy<'info> {
 
 #[account]
 pub struct MarketplaceItem {
-    pub name: String,
-    pub token_mint_account: Pubkey,
-    pub token_account: Pubkey,
-    pub seller: Pubkey,
-    pub buyer: Option<Pubkey>,
+    // cryptail account
+    pub cryptail_account: Pubkey,
+    pub seller_account: Pubkey,
+    pub buyer_account: Option<Pubkey>,
     pub start_sell_at: u64,
     pub bought_at: u64,
     pub price: u64,
