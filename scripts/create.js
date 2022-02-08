@@ -15,6 +15,7 @@ const programId = new PublicKey(data.programId);
 
 //TODO: try move token and mint accounts init to program
 async function createMint(provider, authority) {
+  console.log(provider.wallet)
   const mint = await spl.Token.createMint(
     provider.connection,
     provider.wallet.payer,
